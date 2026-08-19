@@ -1,0 +1,86 @@
+<body>
+ 
+    <div class="inventario">
+  <h1>{{ tituloSistema }}</h1>
+  <h2>{{ nombreTienda }}</h2>
+
+  <p>Total de productos: {{ totalProductos }}</p>
+  <p>Productos disponibles: {{ productosDisponibles }}</p>
+  <p>Productos agotados: {{ productosAgotados }}</p>
+
+  <label for="buscar">Buscar producto:</label>
+  <input id="buscar" type="text" [(ngModel)]="busqueda" placeholder="Ejemplo: Mouse" />
+  <p>Búsqueda actual: {{ busqueda || 'Sin filtro' }}</p>
+
+  <div *ngIf="busqueda?.toLowerCase().includes('mambo')" style="margin-top:8px;">
+    <img src="https://th.bing.com/th/id/OIP.DJshv495tBxRulHWCCV74QAAAA?w=138&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Mambo" style="max-width:140px; display:block;">
+  </div>
+
+  <button type="button" (click)="cambiarVisibilidad()">
+    {{ mostrarInventario ? 'Ocultar productos' : 'Mostrar productos' }}
+  </button>
+
+  <div *ngIf="mostrarInventario">
+    <div *ngIf="productosFiltrados.length === 0">
+      <p>No se encontraron productos.</p>
+      <div *ngIf="busqueda?.toLowerCase().includes('mambo')" style="margin-top:8px;">
+        <img src="https://th.bing.com/th/id/OIP.DJshv495tBxRulHWCCV74QAAAA?w=138&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Mambo" style="max-width:140px; display:block;">
+      </div>
+    </div>
+
+    <table *ngIf="productosFiltrados.length > 0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Estado stock</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let producto of productosFiltrados; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>
+            {{ producto.nombre }}
+            <div *ngIf="producto.nombre?.toLowerCase().includes('mambo')">
+              <img src="https://th.bing.com/th/id/OIP.DJshv495tBxRulHWCCV74QAAAA?w=138&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Mambo" style="max-width:80px; display:block; margin-top:4px;">
+            </div>
+          </td>
+          <td>{{ producto.categoria }}</td>
+          <td>Q{{ producto.precio | number: '1.2-2' }}</td>
+          <td>{{ producto.stock }}</td>
+          <td>
+            <span *ngIf="producto.stock > 3">Stock suficiente</span>
+            <span *ngIf="producto.stock > 0 && producto.stock <= 3">¡Pocas unidades!</span>
+            <span *ngIf="producto.stock === 0">Agotado</span>
+          </td>
+          <td>
+            <span *ngIf="producto.activo; else productoInactivo">Producto activo</span>
+            <ng-template #productoInactivo>
+              <span>Producto deshabilitado</span>
+            </ng-template>
+          </td>
+          <td>
+            <button type="button" (click)="seleccionarProducto(producto)">Ver detalle</button>
+            <button type="button" [disabled]="!producto.activo" (click)="aumentarStock(producto)">+ Stock</button>
+            <button type="button" [disabled]="!producto.activo || producto.stock === 0" (click)="disminuirStock(producto)">- Stock</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="productoSeleccionado">
+    <h3>Producto seleccionado</h3>
+    <p>Nombre: {{ productoSeleccionado.nombre }}</p>
+    <p>Categoría: {{ productoSeleccionado.categoria }}</p>
+    <p>Precio: Q{{ productoSeleccionado.precio | number: '1.2-2' }}</p>
+    <p>Stock: {{ productoSeleccionado.stock }}</p>
+    <p>Estado: {{ getEstadoDetalle(productoSeleccionado) }}</p>
+  </div>
+</div>
+</body>
